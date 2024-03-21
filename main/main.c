@@ -19,11 +19,10 @@ const int TRIG_PIN = 13;
 QueueHandle_t time_queue;
 QueueHandle_t dist_queue;
 
-SemaphoreHandle_t xSemaphore;
+SemaphoreHandle_t xSemaphore = NULL;
 
 void echo_pin_callback(uint gpio, uint32_t events){
-    static uint32_t time_start;
-    static uint32_t time_end, time_diff;
+    static uint32_t time_start, time_end, time_diff;
     if(events == GPIO_IRQ_EDGE_RISE){
         time_start = time_us_32();
     } else if (events == GPIO_IRQ_EDGE_FALL){
@@ -74,7 +73,6 @@ void oled_task(void *p){
                 printf("%u\n", dist);
                 float scale = 1.5;
                 progress = (int)(dist * scale);
-                // progress = abs((dist/128)*100);
                 if(progress > 128){
                     progress = 128;
                 }
@@ -86,7 +84,6 @@ void oled_task(void *p){
 
                 gfx_show(&disp);
             } else {
-                printf("else");
                 gfx_clear_buffer(&disp);
                 gfx_draw_string(&disp, 0, 10, 1, "Falhou");
                 gfx_show(&disp);
@@ -98,8 +95,8 @@ void oled_task(void *p){
 int main() {
     stdio_init_all();
 
-    time_queue = xQueueCreate(100, sizeof(uint32_t));
-    dist_queue = xQueueCreate(100, sizeof(uint32_t));
+    time_queue = xQueueCreate(5, sizeof(uint32_t));
+    dist_queue = xQueueCreate(5, sizeof(uint32_t));
 
     xSemaphore = xSemaphoreCreateBinary();
 
