@@ -66,7 +66,6 @@ void oled_task(void *p){
 
     uint32_t dist;
     char dist_str[20];
-    char progress_str[128];
     int progress;
 
     while(true){
